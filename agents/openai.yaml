@@ -1,0 +1,8 @@
+interface:
+  display_name: "Dev Guard"
+  short_description: "Safer software changes with risk-based test gates"
+  default_prompt: "Use $dev-guard to plan, implement, and verify this software task with evidence-backed risk gates."
+  brand_color: "#5B5FEF"
+
+policy:
+  allow_implicit_invocation: true
