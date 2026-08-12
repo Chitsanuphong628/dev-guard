@@ -163,4 +163,4 @@ After installation, invoke it explicitly with `$dev-guard`, or let implicit invo
 
 ## License
 
-This repository is public. No license is included yet; public visibility does not by itself grant reuse rights.
+This project is licensed under the [MIT License](LICENSE). You may use, modify, distribute, and reuse it, subject to preserving the copyright and license notice.
