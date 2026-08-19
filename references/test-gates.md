@@ -2,6 +2,54 @@
 
 Use this catalogue to choose gates by risk and affected surface. Do not run irrelevant gates just to make a checklist look complete. Do not omit a directly relevant gate because the task is small.
 
+## Test proportionality
+
+Select the smallest set of tests that meaningfully covers the changed behavior and credible failure modes:
+
+| Risk | Test expectation | Avoid |
+| --- | --- | --- |
+| Low | focused unit/component/static checks and relevant existing tests | broad E2E, load, or security suites with no plausible impact |
+| Medium | changed logic plus nearest consumer, integration boundary, and regression path | testing every unrelated module |
+| High | all relevant correctness, negative, security/privacy, compatibility, performance/reliability, recovery, and release gates | declaring release-ready from narrow tests |
+| Critical | stop for a safe plan, recovery/rollback, and approval before consequential action | proceeding on assumptions |
+
+Do not use a universal coverage percentage as the definition of quality. Explain why each selected gate is relevant and why an omitted gate is not needed or is blocked.
+
+## Technical-debt gate
+
+For each debt item, record:
+
+- `existing` or `introduced`;
+- category: design, test, dependency, data, observability, performance, security, or operational;
+- reason for deferral or introduction;
+- user/system impact and severity;
+- trigger, owner, or follow-up path;
+- condition that would make deferral unsafe.
+
+Do not add unrelated tests or refactors only to make a report appear comprehensive. A missing test because of a deliberate test-free-PR convention is a real `reviewability` debt/risk and must be disclosed.
+
+## Public PR cleanliness gate
+
+When the user's project convention requires public PRs without test files, run tests locally first and then keep test-only files out of the staged diff. This does not mean deleting tests or removing quality evidence.
+
+Run:
+
+```text
+python <path-to-dev-guard>/scripts/pr_clean_audit.py --repo <repo-path>
+python <path-to-dev-guard>/scripts/pr_clean_audit.py --repo <repo-path> --unstage
+python <path-to-dev-guard>/scripts/pr_clean_audit.py --repo <repo-path>
+```
+
+The first command audits; the second safely removes identified test-only paths from the index without deleting working-tree files; the third confirms the staged set is clean. Inspect mixed files manually because `package.json`, workflow files, and docs may contain both runtime and test-only changes.
+
+Flag staged paths whose primary purpose is testing or test output, including:
+
+- `test/`, `tests/`, `__tests__/`, `spec/`, `__snapshots__/`;
+- names matching `*.test.*`, `*.spec.*`, `scripts/test-*`;
+- fixtures, snapshots, coverage, `test-results`, Playwright/Cypress reports, debug logs, temporary screenshots, and generated test reports.
+
+Do not remove production source merely because a test-related symbol appears inside it. For mixed files, remove only the test-only hunks. If tests are local-only, report the exact command and `Evidence scope: LOCAL-ONLY`; do not imply PR reviewers can reproduce them.
+
 ## Common gates for every change
 
 | Gate | Question | Evidence |

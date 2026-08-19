@@ -1,6 +1,6 @@
 ---
 name: dev-guard
-description: Evidence-driven software development for feature work, bug fixes, refactors, reviews, migrations, APIs, frontend, backend, mobile, databases, and deployments. Use when Codex must clarify decision-changing ambiguity before editing, inspect baseline and impact, prevent side effects and technical debt, select risk-based test gates, run or document evidence, and finish with PASS, CONDITIONAL PASS, or FAIL plus known issues and remaining risks.
+description: Evidence-driven software development for feature work, bug fixes, refactors, reviews, migrations, APIs, frontend, backend, mobile, databases, and deployments. Use when Codex must clarify decision-changing ambiguity before editing, inspect baseline and impact, prevent side effects and technical debt, select proportionate risk-based test gates, keep public PRs clean by excluding test-only files when required, run or document evidence, and finish with PASS, CONDITIONAL PASS, or FAIL plus known issues and remaining risks.
 ---
 
 # Dev Guard
@@ -19,6 +19,7 @@ Act as a skeptical, maintainable-by-default software engineer. Make the smallest
 - Separate code defects, test defects, dependency/tool failures, and environment/credential/device blockers.
 - Treat `BLOCKED` or `NOT RUN` as different from `PASS`. A blocked critical gate prevents a release-ready claim.
 - Use the smallest workflow that fits the task. “Comprehensive” means covering relevant risks, not running irrelevant tests.
+- When the project/user convention requires test-free PRs, run tests locally before staging, then exclude test-only files and artifacts from the PR without deleting them from the working tree.
 
 ## Workflow
 
@@ -69,6 +70,15 @@ Assign a risk level using the highest credible impact:
 
 Use `references/test-gates.md` to select gates by risk and affected surface. Never use risk level as an excuse to skip a directly relevant gate.
 
+Size the test effort to the risk instead of chasing a universal coverage number:
+
+- **Low**: run focused checks for the changed behavior and relevant existing tests; avoid broad E2E or performance suites with no credible failure path.
+- **Medium**: add tests for changed logic plus the nearest shared consumer, integration boundary, or regression path.
+- **High**: run every relevant correctness, negative, security/privacy, performance/reliability, compatibility, recovery, and release gate; state limitations explicitly.
+- **Critical**: stop before consequential action until the safe test/recovery plan and required approval exist.
+
+Record technical debt separately from test scope. For each existing or introduced debt item, name its type, why it exists, user/system impact, severity, trigger or owner for follow-up, and the condition that would make it unsafe to defer. Do not add unrelated tests or refactors merely to make the report look complete.
+
 ### 5. Design for maintenance and low side effect
 
 Before implementation, make the design legible:
@@ -114,6 +124,20 @@ Every task needs the common gates: requirement/scope, baseline, impact/risk, mai
 - observability, build, package, deployment, post-deploy smoke, and rollback checks for release work.
 
 Use actual project commands when available. If a command is absent, say so and choose the least speculative alternative. Record command, scope, result, and evidence for every executed gate.
+
+### 7a. Clean the PR before commit/push
+
+For this user's public-PR convention, the PR must not contain test files. This is a publication rule, not permission to delete tests or weaken quality gates.
+
+1. Run the selected tests locally and capture their evidence before cleaning the staged set.
+2. Inspect staged files with `git diff --cached --name-status`.
+3. Run `scripts/pr_clean_audit.py --repo <repo>` from this skill. It identifies test source files, test-only fixtures/snapshots, coverage/results, debug artifacts, and test-only path names in the staged diff.
+4. Remove only those paths from the index with `--unstage`; keep the files in the working tree for local verification. The command must not delete files.
+5. For mixed files such as `package.json`, preserve runtime changes and remove only test-only hunks. Never unstage the whole file when it contains required production changes.
+6. Re-run the audit and inspect `git diff --cached` again before commit/push.
+7. If durable regression tests are intentionally local-only, report `Evidence scope: LOCAL-ONLY`, the exact test command, and the reviewability risk. Do not claim that a reviewer can reproduce the test from the PR.
+
+The audit must cover names such as `test/`, `tests/`, `__tests__/`, `*.test.*`, `*.spec.*`, `scripts/test-*`, fixtures, snapshots, coverage, test-results, debug logs, temporary screenshots, and generated reports. Use repository-specific judgment for ambiguous files; do not unstage a production module merely because its name contains “test”.
 
 ### 8. Verify regression and preservation
 
@@ -163,8 +187,11 @@ Use these labels consistently:
 
 Do not convert `BLOCKED`, `NOT RUN`, or `ASSUMED` into `PASS` by wording.
 
+`LOCAL-ONLY` is an evidence-scope qualifier, not a passing result. Use it when a test was executed locally but its source or fixture is intentionally excluded from the PR. This convention creates reviewability risk and must appear in the final report.
+
 ## Reference routing
 
 - Read [test-gates.md](references/test-gates.md) when selecting or documenting gates.
 - Read [obsidian-report.md](references/obsidian-report.md) when creating a complete Obsidian report.
+- Run [scripts/pr_clean_audit.py](scripts/pr_clean_audit.py) before committing or pushing a public PR.
 - Use [dev-guard-flow.svg](assets/dev-guard-flow.svg) as a public-repo visual or a report attachment when a static flow image is useful.

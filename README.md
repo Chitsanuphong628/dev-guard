@@ -88,6 +88,22 @@ Every task has common gates. Additional gates are selected for the affected surf
 
 Read [`references/test-gates.md`](references/test-gates.md) for the complete catalogue.
 
+## Public PR cleanliness convention
+
+For this workflow, a public PR should be as clean as possible: **test-only files should not be included in the PR**. Tests are run locally first for confidence, then test source files, fixtures, snapshots, coverage, debug logs, screenshots, and generated test reports are removed from the staged set before commit/push.
+
+Run the built-in audit:
+
+```text
+python <path-to-dev-guard>/scripts/pr_clean_audit.py --repo <repo-path>
+python <path-to-dev-guard>/scripts/pr_clean_audit.py --repo <repo-path> --unstage
+python <path-to-dev-guard>/scripts/pr_clean_audit.py --repo <repo-path>
+```
+
+`--unstage` only removes identified paths from Git's index; it does not delete local test files. Mixed files such as `package.json` must be cleaned at hunk level so required runtime changes remain.
+
+This is a user/project convention, not a universal open-source best practice. Excluding durable regression tests makes PR review and reproduction weaker, so Dev Guard must report `Evidence scope: LOCAL-ONLY` and the resulting reviewability risk instead of hiding it.
+
 ## Gate result vocabulary
 
 | Status | Meaning | Release implication |
@@ -144,6 +160,8 @@ dev-guard/
 ├── README.md
 ├── agents/
 │   └── openai.yaml
+├── scripts/
+│   └── pr_clean_audit.py
 ├── references/
 │   ├── obsidian-report.md
 │   └── test-gates.md

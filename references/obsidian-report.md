@@ -128,12 +128,14 @@ flowchart LR
 | ... | ... | ... |
 
 ## Gate results
-| Gate | Scope/method | Result | Evidence | Remaining risk |
-|---|---|---|---|---|
-| Requirement/scope | ... | PASS | ... | ... |
-| Baseline/reproduction | ... | PASS | ... | ... |
-| Static quality | ... | ... | ... | ... |
-| Unit/integration/E2E | ... | ... | ... | ... |
+| Gate | Scope/method | Result | Evidence | Evidence scope | Remaining risk |
+|---|---|---|---|---|---|
+| Requirement/scope | ... | PASS | ... | REPO / LOCAL-ONLY | ... |
+| Baseline/reproduction | ... | PASS | ... | REPO / LOCAL-ONLY | ... |
+| Static quality | ... | ... | ... | REPO / LOCAL-ONLY | ... |
+| Unit/integration/E2E | ... | ... | ... | LOCAL-ONLY | ... |
+
+For the user's test-free-PR convention, add `Evidence scope: LOCAL-ONLY` when the test source or fixture is intentionally excluded from the PR. Add a `reviewability` technical-debt item under remaining risks; do not present local-only evidence as reproducible from the PR.
 
 ## Commands and observations
 ```text
@@ -154,6 +156,7 @@ flowchart LR
 
 ## Remaining risks
 - ...
+- Reviewability debt from local-only tests: ...
 
 ## Rollback / recovery
 - ...
@@ -170,6 +173,7 @@ Replace the final callout type to match the actual decision. Never use a green c
 - Separate executed evidence from assumptions.
 - Name exact commands and relevant output; do not paste noisy logs without interpretation.
 - Link to repository files, tests, screenshots, artifacts, or logs when paths are available.
+- When test files are excluded by project convention, link to local evidence if available and state that the PR itself cannot reproduce the test.
 - Explain blocked environment/device/service checks and their release impact.
 - End with exactly one final decision and a concise remaining-risk list.
 - Prefer one useful Mermaid flow over many decorative diagrams.
